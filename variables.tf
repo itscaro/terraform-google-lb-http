@@ -51,13 +51,13 @@ variable "target_tags" {
 }
 
 variable "backends" {
-  description = "Map backend indices to list of backend maps."
-  type        = map
+  description = "List of backend"
+  type        = list
 }
 
 variable "backend_params" {
-  description = "Comma-separated encoded list of parameters in order: health check path, service port name, service port, backend timeout seconds"
-  type        = list(string)
+  description = "List of healthcheck for each backend: each element is a map of path, port_name, port, timeout"
+  type        = list
 }
 
 variable "backend_protocol" {
