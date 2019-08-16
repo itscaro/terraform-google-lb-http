@@ -83,13 +83,13 @@ resource "google_compute_url_map" "default" {
 
 resource "google_compute_backend_service" "default" {
   project     = var.project
-  count       = length(var.backend_params)
+  count       = length(var.backends)
   name        = "${var.name}-backend-${count.index}"
-  port_name   = var.backend_params[count.index].port_name
+  port_name   = var.backends[count.index].params.port_name
   protocol    = var.backend_protocol
-  timeout_sec = var.backend_params[count.index].timeout
+  timeout_sec = var.backends[count.index].params.timeout
   dynamic "backend" {
-    for_each = var.backends[count.index]
+    for_each = var.backends[count.index].backends
     content {
       balancing_mode               = lookup(backend.value, "balancing_mode", null)
       capacity_scaler              = lookup(backend.value, "capacity_scaler", null)
@@ -109,15 +109,15 @@ resource "google_compute_backend_service" "default" {
 
 resource "google_compute_http_health_check" "default" {
   project      = var.project
-  count        = length(var.backend_params)
+  count        = length(var.backends)
   name         = "${var.name}-backend-${count.index}"
-  request_path = var.backend_params[count.index].path
-  port         = var.backend_params[count.index].port
+  request_path = var.backends[count.index].params.path
+  port         = var.backends[count.index].params.port
 }
 
 # Create firewall rule for each backend in each network specified, uses mod behavior of element().
 resource "google_compute_firewall" "default-hc" {
-  count         = length(var.firewall_networks) * length(var.backend_params)
+  count         = length(var.firewall_networks) * length(var.backends)
   project       = var.firewall_projects[count.index] == "default" ? var.project : var.firewall_projects[count.index]
   name          = "${var.name}-hc-${count.index}"
   network       = var.firewall_networks[count.index]
@@ -126,7 +126,7 @@ resource "google_compute_firewall" "default-hc" {
 
   allow {
     protocol = "tcp"
-    ports = var.backend_params.*.port
+    ports = var.backends.*.params.port
   }
 }
 

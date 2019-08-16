@@ -51,12 +51,7 @@ variable "target_tags" {
 }
 
 variable "backends" {
-  description = "List of backend"
-  type        = list
-}
-
-variable "backend_params" {
-  description = "List of healthcheck for each backend: each element is a map of path, port_name, port, timeout"
+  description = "List of backend, each element is map of 'params' & 'backends'"
   type        = list
 }
 
